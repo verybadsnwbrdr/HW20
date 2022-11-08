@@ -80,9 +80,9 @@ func getData(urlRequest: URL?) {
 // MARK: - Printer
 
 func printer(cards: [Card]?) {
-    guard var cards = cards else { return }
+    guard let cards = cards else { return }
     for card in cards {
-        if card.name == "Opt" || card.name == "Black Lotus", var manacost = card.manaCost {
+        if var manacost = card.manaCost {
             manacost = manacost.filter { $0 != "{" && $0 != "}" }
             print("""
                 Название карты - \(card.name)
