@@ -6,6 +6,7 @@ struct CardURL {
     enum CardName: String {
         case opt
         case blackLotus = "black_lotus"
+        case twoCards = "opt|black_lotus"
     }
     
     private var components = URLComponents()
@@ -17,11 +18,11 @@ struct CardURL {
     private let queryValue: CardName
     
     init(with name: CardName) {
-        self.queryValue = name
-        set()
+        queryValue = name
+        setURL()
     }
     
-    private mutating func set() {
+    private mutating func setURL() {
         components.scheme = scheme
         components.host = host
         components.path = path
@@ -62,7 +63,7 @@ func getData(urlRequest: URL?) {
             guard let data = data else { return }
             do {
                 let decoded = try JSONDecoder().decode(Cards.self, from: data)
-                print(card: decoded.cards[0])
+                printer(cards: decoded.cards)
             } catch {
                 print("Ошибка при декодировке JSON")
             }
@@ -78,17 +79,20 @@ func getData(urlRequest: URL?) {
 
 // MARK: - Printer
 
-func print(card: Card?) {
-    if let card = card, var manacost = card.manaCost {
-        manacost = manacost.filter { $0 != "{" && $0 != "}" }
-        print("""
-        Название карты - \(card.name)
-        Стоимость - \(manacost)
-        Тип - \(card.type)
-        Редкость - \(card.rarity)
-        Название набора - \(card.setName)\n
-        """
-        )
+func printer(cards: [Card]?) {
+    guard var cards = cards else { return }
+    for card in cards {
+        if card.name == "Opt" || card.name == "Black Lotus", var manacost = card.manaCost {
+            manacost = manacost.filter { $0 != "{" && $0 != "}" }
+            print("""
+                Название карты - \(card.name)
+                Стоимость - \(manacost)
+                Тип - \(card.type)
+                Редкость - \(card.rarity)
+                Название набора - \(card.setName)\n
+                """
+            )
+        }
     }
 }
 
@@ -96,7 +100,10 @@ func print(card: Card?) {
 
 let blackLotusURL = CardURL(with: .blackLotus).getURL()
 let optURL = CardURL(with: .opt).getURL()
+let twoNames = CardURL(with: .twoCards).getURL()
 
-getData(urlRequest: blackLotusURL)
-getData(urlRequest: optURL)
+//getData(urlRequest: blackLotusURL)
+//getData(urlRequest: optURL)
+getData(urlRequest: twoNames)
+
 
